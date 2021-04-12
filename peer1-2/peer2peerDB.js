@@ -16,6 +16,8 @@ folder = folder.split("-");
 let peerID = folder[0];
 let tableSize = folder[1];
 
+
+
 if (process.argv.length > 2) {
   let hostserverIPandPort = process.argv[3].split(":");
 
@@ -25,11 +27,16 @@ if (process.argv.length > 2) {
   // connect to the known peer address
   let clientPeer = new net.Socket();
 
+
   clientPeer.connect(knownPORT, knownHOST, function () {
     let peerTable = [];
 
     handler.handleCommunications(clientPeer, tableSize, peerID, peerTable);
   });
+
+
+
+
 } else {
   // call as node peer (no arguments)
   // run as a server

@@ -23,7 +23,7 @@ module.exports = {
 };
 
 function communicate(client, maxPeers, location, peerTable) {
-  console.log(maxPeers, location, peerTable, "HEREEEEEE");
+
   // get message from server
 
   client.on("data", (message) => {
