@@ -21,14 +21,14 @@ module.exports = {
 
     //fill out the header array of byte with PTP header fields
     // V
-    storeBitPacket(this.message, version*1, 0, 3);
+    storeBitPacket(this.message, version * 1, 0, 3);
 
     // Message type
     storeBitPacket(this.message, messageType, 3, 8);
 
     // Number of peers
     storeBitPacket(this.message, noOfPeers, 11, 13);
-  
+
     // Sender ID size
     let senderID = stringToBytes(sender);
     storeBitPacket(this.message, senderID.length, 24, 8);
@@ -53,7 +53,7 @@ module.exports = {
         let thirdOctet = IP.split(".")[2];
         let forthOctet = IP.split(".")[3];
 
-        storeBitPacket(this.message, firstOctet*1, bitMarker, 8);
+        storeBitPacket(this.message, firstOctet * 1, bitMarker, 8);
         bitMarker += 8;
         storeBitPacket(this.message, secondOctet, bitMarker, 8);
         bitMarker += 8;

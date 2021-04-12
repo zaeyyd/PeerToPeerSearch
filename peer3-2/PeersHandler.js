@@ -127,11 +127,14 @@ function communicate(client, maxPeers, location, peerTable) {
 
       declinePorts.push(client.remotePort);
 
+
       const filtered = msgPeerTable.filter(
         (item) => !declinePorts.includes(item.peerPort)
       );
 
+
       peersToJoin = filtered.concat(peersToJoin);
+
 
       maxPeers = maxPeers;
       peerLocation = location;
@@ -157,11 +160,14 @@ function communicate(client, maxPeers, location, peerTable) {
   });
   client.on("end", () => {
     if (isFull[client.remotePort]) {
+
       // connect to the known peer address
       let newClientPeer = new net.Socket();
       // We will consider the first peer in the list, this is only for this assignment.
       // We must consider the new requirements in assignment 3.
       let joining = peersToJoin.shift();
+
+
 
       newClientPeer.connect(joining.peerPort, joining.peerIP, function () {
         // initialize peer table
@@ -226,4 +232,3 @@ function parseBitPacket(packet, offset, length) {
   }
   return number;
 }
-
