@@ -4,6 +4,7 @@ let net = require("net"),
 
 let isFull = {};
 let peersToJoin = [];
+let declinePorts = []
 let maxPeers, peerLocation;
 
 module.exports = {
@@ -126,8 +127,24 @@ module.exports = {
       } else {
         console.log("Received ack from " + sender + ":" + client.remotePort);
         isFull[client.remotePort] = true;
+
+        declinePorts.push(client.remotePort)
+        console.log(declinePorts)
+
+        const filtered = msgPeerTable.filter((item) => !declinePorts.includes(item.peerPort));
+        console.log(filtered)
   
-        peersToJoin = msgPeerTable;
+        peersToJoin = filtered.concat(peersToJoin)
+        console.log(peersToJoin)
+        console.log(msgPeerTable)
+        
+
+
+
+
+
+
+
         maxPeers = maxPeers;
         peerLocation = location;
   
@@ -159,10 +176,11 @@ module.exports = {
         let newClientPeer = new net.Socket();
         // We will consider the first peer in the list, this is only for this assignment. 
         // We must consider the new requirements in assignment 3. 
+        let joining = peersToJoin.shift()
   
         newClientPeer.connect(   
-          peersToJoin[0].peerPort,
-          peersToJoin[0].peerIP,
+          joining.peerPort,
+          joining.peerIP,
           function () {
             // initialize peer table
             let newPeerTable = []; // array of objects
