@@ -1,6 +1,7 @@
 let net = require("net"),
   singleton = require("./Singleton"),
-  handler = require("./PeersHandler");
+  PeerHandler = require("./PeersHandler"),
+  ImgHandler = require('./ClientsHandler');
 
 singleton.init();
 
@@ -28,9 +29,30 @@ if (process.argv.length > 2) {
   clientPeer.connect(knownPORT, knownHOST, function () {
     let peerTable = [];
 
-    handler.handleCommunications(clientPeer, tableSize, peerID, peerTable);
+    PeerHandler.handleCommunications(clientPeer, tableSize, peerID, peerTable);
   });
 } else {
+
+
+
+  let imageDB = net.createServer();
+  let imgPORT = singleton.getPort()
+  imageDB.listen(imgPORT, HOST);
+
+  console.log(
+    "ImageDB server is started at timestamp: " +
+      singleton.getTimestamp() +
+      " and is listening on " +
+      HOST +
+      ":" +
+      imgPORT
+  );
+
+  imageDB.on("connection", function (sock) {
+    ImgHandler.handleClientJoining(sock); //called for each client joining
+  });
+
+
   // call as node peer (no arguments)
   // run as a server
   let serverPeer = net.createServer();
@@ -48,6 +70,8 @@ if (process.argv.length > 2) {
   let peerTable = [];
   serverPeer.on("connection", function (sock) {
     // received connection request
-    handler.handleClientJoining(sock, tableSize, peerID, peerTable);
+    PeerHandler.handleClientJoining(sock, tableSize, peerID, peerTable);
   });
+
+
 }

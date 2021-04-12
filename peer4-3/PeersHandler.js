@@ -2,12 +2,16 @@ let net = require("net"),
   cPTPpacket = require("./cPTPmessage"),
   singleton = require("./Singleton");
 
+
+
+
 let isFull = {};
 let peersToJoin = [];
 let declinePorts = [];
 let maxPeers, peerLocation;
 
 module.exports = {
+  //server
   handleClientJoining: function (sock, maxPeers, sender, peerTable) {
     let peersCount = peerTable.length;
     if (peersCount >= maxPeers) {
@@ -17,6 +21,7 @@ module.exports = {
     }
   },
 
+  //client
   handleCommunications: function (client, maxPeers, location, peerTable) {
     communicate(client, maxPeers, location, peerTable);
   },
@@ -226,4 +231,3 @@ function parseBitPacket(packet, offset, length) {
   }
   return number;
 }
-
