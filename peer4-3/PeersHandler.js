@@ -9,7 +9,7 @@ let maxPeers, peerLocation;
 module.exports = {
   handleClientJoining: function (sock, maxPeers, sender, peerTable) {
     let peersCount = peerTable.length;
-    if (peersCount == maxPeers) {
+    if (peersCount >= maxPeers) {
       declineClient(sock, sender, peerTable);
     } else {
       handleClient(sock, sender, peerTable);
@@ -25,7 +25,7 @@ module.exports = {
 
   
   function communicate(client, maxPeers, location, peerTable) {
-    console.log(client, maxPeers, location, peerTable, "HEREEEEEE")
+    console.log(maxPeers, location, peerTable, "HEREEEEEE")
     // get message from server
   
     client.on("data", (message) => {
@@ -101,7 +101,7 @@ module.exports = {
         );
         serverPeer.on("connection", function (sock) {
           let peersCount = peerTable.length;
-          if (peersCount === maxPeers) {
+          if (peersCount >= maxPeers) {
             declineClient(sock, location, peerTable);
           } else {
             handleClient(sock, location, peerTable);
