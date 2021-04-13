@@ -49,7 +49,7 @@ if (process.argv.length > 2) {
   );
 
   imageDB.on("connection", function (sock) {
-    ImgHandler.handleClientJoining(sock); //called for each client joining
+    ImgHandler.handleClientJoining(sock, HOST, imgPORT); //called for each client joining
   });
 
 

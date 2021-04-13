@@ -84,15 +84,12 @@ client.on("end", () => {
     
     imageName[i] = receivedImageName + "." + imageExtension[imageType];
     fs.writeFileSync(imageName[i], imageDate);
+
+
+    (async () => {await open(imageName[i], { wait: true });})();
   }
 
-  // open images
-  (async () => {
-    // Opens the image in the default image viewer and waits for the opened app to finish.
-    for (var i = 0; i < imageCount; i++) {
-      await open(imageName[i], { wait: true });
-    }
-  })();
+
 
   console.log("\nServer sent:");
   console.log("    --ITP version = " + parseBitPacket(header, 0, 3));

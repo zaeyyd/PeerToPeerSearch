@@ -1,13 +1,21 @@
 var ITPpacket = require("./ITPResponse"),
+cPTPsearch = require("./cPTPsearch"),
   singleton = require("./Singleton");
 const fs = require("fs");
+
+var path = require("path");
+var currFile = path.dirname(__filename).split("/");
+let folder = currFile.slice(-1)[0];
+folder = folder.split("-");
+
+let peerID = folder[0];
 
 var nickNames = {},
   clientIP = {},
   startTimestamp = {};
 
 module.exports = {
-  handleClientJoining: function (sock) {
+  handleClientJoining: function (sock, HOST, PORT) {
     assignClientName(sock, nickNames);
     const chunks = [];
     console.log(
@@ -17,7 +25,7 @@ module.exports = {
         startTimestamp[sock.id]
     );
     sock.on("data", function (requestPacket) {
-      handleClientRequests(requestPacket, sock); //read client requests and respond
+      handleClientRequests(requestPacket, sock, HOST, PORT); //read client requests and respond
     });
     sock.on("close", function () {
       handleClientLeaving(sock);
@@ -25,7 +33,7 @@ module.exports = {
   },
 };
 
-function handleClientRequests(data, sock) {
+function handleClientRequests(data, sock, HOST, PORT) {
   console.log("\nITP packet received:");
   printPacketBit(data);
 
@@ -50,6 +58,8 @@ function handleClientRequests(data, sock) {
   let imageTypeName = [];
   let imageName = [];
   let imageSize = [];
+
+
   let marker = 32; // start of the first image info
   for (var i = 0; i < imageCount; i++) {
     imageType[i] = parseBitPacket(data, marker, 4);
@@ -81,25 +91,82 @@ function handleClientRequests(data, sock) {
       "\n"
   );
   if (version == 7) {
+    let full = true
     let imagesData = [];
     let imagesDataSize = 0;
+
+    let notHere = []
     for (var i = 0; i < imageCount; i++) {
-      let imageFullName = "images/" + imageName[i] + "." + imageTypeName[i];
-      imagesData[i] = fs.readFileSync(imageFullName);
-      imagesDataSize += imagesData[i].length + imageName[i].length;
+
+      try {
+
+        let imageFullName = "images/" + imageName[i] + "." + imageTypeName[i];
+        //console.log(imageFullName)
+        imagesData[i] = fs.readFileSync(imageFullName);
+        imagesDataSize += imagesData[i].length + imageName[i].length;
+      } catch (error) {
+        //console.log(error, 'this is the error')
+        full = false
+        notHere.push(i)
+        //console.log(i, 'up')
+      }
+     
     }
 
-    ITPpacket.init(
-      version,
-      1, // response type
-      singleton.getSequenceNumber(), // sequence number
-      singleton.getTimestamp(), // timestamp
-      imageType, // array of image types
-      imageName, // array of image names
-      imagesData, // array of images data
-      imagesDataSize, //total size of all images
-      1 // full or partial load (we assume the best-case scenacio in this assigment)
-    );
+    if(full){
+      ITPpacket.init(
+        version,
+        1, // response type
+        singleton.getSequenceNumber(), // sequence number
+        singleton.getTimestamp(), // timestamp
+        imageType, // array of image types
+        imageName, // array of image names
+        imagesData, // array of images data
+        imagesDataSize, //total size of all images
+        1 // full or partial load (we assume the best-case scenacio in this assigment)
+      );
+    }
+    else{
+
+      //console.log(imageType, imageName, imagesData)
+
+      for(let i of notHere){
+        //console.log(i, 'down')
+        imageType.splice(i,1)
+        imageName.splice(i,1)
+        imagesData.splice(i,1)
+      }
+
+      //console.log(imageType, imageName, imagesData)
+
+      ITPpacket.init(
+        version,
+        2, // response type
+        singleton.getSequenceNumber(), // sequence number
+        singleton.getTimestamp(), // timestamp
+        imageType, // array of image types
+        imageName, // array of image names
+        imagesData, // array of images data
+        imagesDataSize, //total size of all images
+        0 // full or partial load (we assume the best-case scenacio in this assigment)
+      );
+
+      cPTPsearch.init(
+        version,
+        2,
+        notHere.length,
+        singleton.getSequenceNumber(),
+        peerID.length,
+        peerID,
+        HOST,
+        PORT
+      )
+
+      console.log("SEARCH PACKET", cPTPsearch.getBytePacket())
+    }
+
+    
+
 
     sock.write(ITPpacket.getBytePacket());
     sock.end();

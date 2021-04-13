@@ -132,9 +132,7 @@ function communicate(client, maxPeers, location, peerTable) {
 
       declinePorts.push(client.remotePort);
 
-      const filtered = msgPeerTable.filter(
-        (item) => !declinePorts.includes(item.peerPort)
-      );
+      const filtered = msgPeerTable.filter((item) => !declinePorts.includes(item.peerPort));
 
       peersToJoin = filtered.concat(peersToJoin);
 
